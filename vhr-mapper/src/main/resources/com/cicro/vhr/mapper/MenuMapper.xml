@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cicro.vhr.mapper.MenuMapper">
+    <resultMap id="BaseResultMap" type="com.cicro.vhr.model.Menu">
+        <id column="id" property="id" jdbcType="INTEGER"/>
+        <result column="url" property="url" jdbcType="VARCHAR"/>
+        <result column="path" property="path" jdbcType="VARCHAR"/>
+        <result column="component" property="component" jdbcType="VARCHAR"/>
+        <result column="name" property="name" jdbcType="VARCHAR"/>
+        <result column="iconCls" property="iconCls" jdbcType="VARCHAR"/>
+        <result column="parentId" property="parentId" jdbcType="INTEGER"/>
+        <result column="enabled" property="enabled" jdbcType="BIT"/>
+        <association property="meta" javaType="com.cicro.vhr.model.Meta">
+            <result column="keepAlive" property="keepAlive" jdbcType="BIT"/>
+            <result column="requireAuth" property="requireAuth" jdbcType="BIT"/>
+        </association>
+        <collection property="children" ofType="com.cicro.vhr.model.Menu" resultMap="MenuResultMap"/>
+    </resultMap>
+
+    <resultMap id="MenuResultMap" type="com.cicro.vhr.model.Menu">
+        <id column="c_id" property="id" jdbcType="INTEGER"/>
+        <result column="c_url" property="url" jdbcType="VARCHAR"/>
+        <result column="c_path" property="path" jdbcType="VARCHAR"/>
+        <result column="c_component" property="component" jdbcType="VARCHAR"/>
+        <result column="c_name" property="name" jdbcType="VARCHAR"/>
+        <result column="c_iconCls" property="iconCls" jdbcType="VARCHAR"/>
+        <result column="c_parentId" property="parentId" jdbcType="INTEGER"/>
+        <result column="c_enabled" property="enabled" jdbcType="BIT"/>
+        <association property="meta" javaType="com.cicro.vhr.model.Meta">
+            <result column="c_keepAlive" property="keepAlive" jdbcType="BIT"/>
+            <result column="c_requireAuth" property="requireAuth" jdbcType="BIT"/>
+        </association>
+    </resultMap>
+    <sql id="Base_Column_List">
+    id, url, path, component, name, iconCls, keepAlive, requireAuth, parentId, enabled
+  </sql>
+
+    <select id="loadMenuTreeByHrId" resultMap="BaseResultMap">
+      SELECT
+      DISTINCT
+          menu1.*,
+          menu2.id as c_id,
+          menu2.url as c_url,
+          menu2.path as c_path,
+          menu2.component as c_component,
+          menu2.name as c_name,
+          menu2.iconCls as c_iconCls,
+          menu2.parentId as c_parentId,
+          menu2.enabled as c_enabled,
+          menu2.keepAlive as c_keepAlive,
+          menu2.requireAuth as c_requireAuth
+      FROM
+          menu AS menu1
+          LEFT JOIN menu menu2 on menu1.id=menu2.parentId
+          LEFT JOIN menu_role mr ON mr.mid=menu2.id
+          LEFT JOIN hr_role hrr on mr.rid=hrr.rid
+          LEFT JOIN hr ON hr.id=hrr.hrid
+          WHERE hr.id=#{id}
+  </select>
+
+    <resultMap id="MenuAndRoleMap" type="com.cicro.vhr.model.Menu">
+        <id column="id" property="id" jdbcType="INTEGER"/>
+        <result column="url" property="url" jdbcType="VARCHAR"/>
+        <result column="path" property="path" jdbcType="VARCHAR"/>
+        <result column="component" property="component" jdbcType="VARCHAR"/>
+        <result column="name" property="name" jdbcType="VARCHAR"/>
+        <result column="iconCls" property="iconCls" jdbcType="VARCHAR"/>
+        <result column="parentId" property="parentId" jdbcType="INTEGER"/>
+        <result column="enabled" property="enabled" jdbcType="BIT"/>
+        <collection property="roles" ofType="com.cicro.vhr.model.Role">
+            <id column="rid" property="rid" jdbcType="INTEGER"/>
+            <result column="rname" property="name" jdbcType="VARCHAR"/>
+            <result column="nameZh" property="nameZh" jdbcType="VARCHAR"/>
+        </collection>
+    </resultMap>
+   <!-- <resultMap id="RoleMap" type="com.cicro.vhr.model.Role">
+
+    </resultMap>-->
+    <resultMap id="MenusTree" type="com.cicro.vhr.model.Menu">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <collection property="children" ofType="com.cicro.vhr.model.Menu">
+            <id column="id2" property="id"/>
+            <result column="name2" property="name"/>
+            <collection property="children" ofType="com.cicro.vhr.model.Menu">
+                <id column="id3" property="id"/>
+                <result column="name3" property="name"/>
+            </collection>
+        </collection>
+    </resultMap>
+
+    <select id="getAllRolesByMenus" resultMap="MenuAndRoleMap">
+      SELECT
+      	m.*,
+      	r.id as rid,
+      	r.`name` as rname,
+      	r.nameZh
+      FROM
+      	menu m
+      	LEFT JOIN menu_role mr ON m.id = mr.mid
+      	LEFT JOIN role r ON r.id = mr.rid
+    </select>
+
+    <select id="getMenusTree" resultMap="MenusTree">
+        SELECT
+            m1.id id,
+            m1.NAME,
+            m2.id id2,
+            m2.`name` name2,
+            m3.id id3,
+            m3.`name` name3
+        FROM
+            menu m1,
+            menu m2,
+            menu m3
+        WHERE
+            m1.id = m2.parentId
+            AND m2.id = m3.parentId
+        ORDER BY
+            m1.id,
+            m2.id,
+            m3.id
+    </select>
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer">
+        select
+        <include refid="Base_Column_List"/>
+        from menu
+        where id = #{id,jdbcType=INTEGER}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from menu
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+    <insert id="insert" parameterType="com.cicro.vhr.model.Menu">
+    insert into menu (id, url, path, 
+      component, name, iconCls, 
+      keepAlive, requireAuth, parentId, 
+      enabled)
+    values (#{id,jdbcType=INTEGER}, #{url,jdbcType=VARCHAR}, #{path,jdbcType=VARCHAR}, 
+      #{component,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, #{iconcls,jdbcType=VARCHAR}, 
+      #{keepalive,jdbcType=BIT}, #{requireauth,jdbcType=BIT}, #{parentid,jdbcType=INTEGER}, 
+      #{enabled,jdbcType=BIT})
+  </insert>
+    <insert id="insertSelective" parameterType="com.cicro.vhr.model.Menu">
+        insert into menu
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="url != null">
+                url,
+            </if>
+            <if test="path != null">
+                path,
+            </if>
+            <if test="component != null">
+                component,
+            </if>
+            <if test="name != null">
+                name,
+            </if>
+            <if test="iconcls != null">
+                iconCls,
+            </if>
+            <if test="keepalive != null">
+                keepAlive,
+            </if>
+            <if test="requireauth != null">
+                requireAuth,
+            </if>
+            <if test="parentid != null">
+                parentId,
+            </if>
+            <if test="enabled != null">
+                enabled,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=INTEGER},
+            </if>
+            <if test="url != null">
+                #{url,jdbcType=VARCHAR},
+            </if>
+            <if test="path != null">
+                #{path,jdbcType=VARCHAR},
+            </if>
+            <if test="component != null">
+                #{component,jdbcType=VARCHAR},
+            </if>
+            <if test="name != null">
+                #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="iconcls != null">
+                #{iconcls,jdbcType=VARCHAR},
+            </if>
+            <if test="keepalive != null">
+                #{keepalive,jdbcType=BIT},
+            </if>
+            <if test="requireauth != null">
+                #{requireauth,jdbcType=BIT},
+            </if>
+            <if test="parentid != null">
+                #{parentid,jdbcType=INTEGER},
+            </if>
+            <if test="enabled != null">
+                #{enabled,jdbcType=BIT},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.cicro.vhr.model.Menu">
+        update menu
+        <set>
+            <if test="url != null">
+                url = #{url,jdbcType=VARCHAR},
+            </if>
+            <if test="path != null">
+                path = #{path,jdbcType=VARCHAR},
+            </if>
+            <if test="component != null">
+                component = #{component,jdbcType=VARCHAR},
+            </if>
+            <if test="name != null">
+                name = #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="iconcls != null">
+                iconCls = #{iconcls,jdbcType=VARCHAR},
+            </if>
+            <if test="keepalive != null">
+                keepAlive = #{keepalive,jdbcType=BIT},
+            </if>
+            <if test="requireauth != null">
+                requireAuth = #{requireauth,jdbcType=BIT},
+            </if>
+            <if test="parentid != null">
+                parentId = #{parentid,jdbcType=INTEGER},
+            </if>
+            <if test="enabled != null">
+                enabled = #{enabled,jdbcType=BIT},
+            </if>
+        </set>
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.cicro.vhr.model.Menu">
+    update menu
+    set url = #{url,jdbcType=VARCHAR},
+      path = #{path,jdbcType=VARCHAR},
+      component = #{component,jdbcType=VARCHAR},
+      name = #{name,jdbcType=VARCHAR},
+      iconCls = #{iconcls,jdbcType=VARCHAR},
+      keepAlive = #{keepalive,jdbcType=BIT},
+      requireAuth = #{requireauth,jdbcType=BIT},
+      parentId = #{parentid,jdbcType=INTEGER},
+      enabled = #{enabled,jdbcType=BIT}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

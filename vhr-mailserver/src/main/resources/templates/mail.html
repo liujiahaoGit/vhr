@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<style>
+  div,h1{
+    display: flex;
+    justify-content: center;
+  }
+</style>
+<head>
+  <meta charset="UTF-8">
+  <title>入职邮件</title>
+</head>
+<body>
+  <h1>亲爱的<span th:text="${name}" style="color: red"></span>,欢迎您入职陕西至正力合信息技术有限公司</h1>
+  <div>
+    <table border="1" cellspacing="1" cellpadding="1" width="200px">
+      <tr>
+        <td>姓名</td>
+        <td th:text="${name}"></td>
+      </tr>
+      <tr>
+        <td>性别</td>
+        <td th:text="${gender}"></td>
+
+      <tr>
+        <td>部门</td>
+        <td th:text="${deptName}"></td>
+      </tr>
+      <tr>
+        <td>职位</td>
+        <td th:text="${posName}"></td>
+      </tr>
+      <tr>
+        <td>职称</td>
+        <td th:text="${jobLevelName}"></td>
+      </tr>
+      <tr>
+        <td>薪水</td>
+        <td>6000</td>
+      </tr>
+    </table>
+  </div>
+</body>
+</html>

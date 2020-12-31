@@ -1,0 +1,46 @@
+
+spring:
+  profiles:
+    active: dev
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/vhr?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf8&autoReconnect=true&useSSL=false&allowMultiQueries=true
+    username: root
+    password: root
+  main:
+    allow-bean-definition-overriding: true
+
+    ##mq相关配置
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+    #确认消息已发送到交换机exchange(开启手动确认消息)
+    publisher-confirm-type: correlated
+    #确认消息从exchange发送到queue
+    publisher-returns: true
+
+
+
+  #配置日志写入方式
+logging:
+  config: 'classpath:log/logback.xml'
+  level:
+    com.cicro.vhr: trace
+
+mybatis:
+  type-aliases-package: com.cicro.vhr.entity #配置映射的实体类包别名
+  # configuration:
+  #   log-impl: org.apache.ibatis.logging.stdout.StdOutImpl  #控制台打印SQL
+
+#配置分页插件
+pagehelper:
+  helperDialect: mysql
+  reasonable: true
+  supportMethodsArguments: true
+  params: count=countSql
+
+fastDFS:
+  host: http://192.168.2.128/

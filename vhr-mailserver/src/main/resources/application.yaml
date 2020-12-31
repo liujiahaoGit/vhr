@@ -1,0 +1,52 @@
+server:
+  port: 8083
+
+
+##发送邮件相关配置
+spring:
+  mail:
+    host: smtp.qq.com
+    port: 587
+    protocol: smtp
+    default-encoding: UTF-8
+    password: ufbajmasnhlkbbfi #邮箱中申请的密钥
+    username: 1013279804@qq.com #发送方的邮箱
+    properties:
+      mail:
+        debug: true #打印日志
+        stmp:
+          socketFactory:
+            class: javax.net.ssl.SSLSocketFactory #邮件加密
+  main:
+    allow-bean-definition-overriding: true
+##mq相关配置
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+    listener:
+      simple:
+        acknowledge-mode: manual #手动确认消息
+        prefetch: 100  #一次预加载消息的数量
+
+  redis:
+    # Redis数据库索引（默认为0）
+    database: 3
+    # Redis服务器地址
+    host: 10.16.64.39
+    # Redis服务器连接端口
+    port: 6300
+    # Redis服务器连接密码（默认为空）
+    password: Admin123
+    # 连接超时时间（毫秒）
+    timeout: 5000
+
+
+
+
+  #配置日志写入方式
+logging:
+  config: 'classpath:log/logback.xml'
+  level:
+    com.cicro.vhr: trace
